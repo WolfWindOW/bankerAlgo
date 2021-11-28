@@ -39,123 +39,122 @@ C has 7 instances
 //  Else try next sequence
 
 class Process {
-    public:
-    Process(std::array<int,3> alloc);
-    
-    int getID() {return processID_;}
-    std::array<int,3> getAlloc() {return allocation_;}
-    std::array<int,3> getMax() {return max_;};
-    int getNeed(int i) {return need_[i];}
-    bool isLOE(std::array<int,3> work){
-        for(int i = 0; i < 3; i++){
-            if(need_[i]>work[i]) return false;
+public:
+    Process(std::array<int, 3> alloc);
+
+    int getID() { return processID_; }
+    int getAlloc(int i) { return allocation_[i]; }
+    std::array<int, 3> getMax() { return max_; };
+    int getNeed(int i) { return need_[i]; }
+    bool isLOE(std::array<int, 3> work) {
+        for (int i = 0; i < 3; i++) {
+            if (need_[i] > work[i]) return false;
         }
         return true;
     }
-    protected:
+protected:
     static int id_;
-    private:
-    std::array<int,3> allocation_;
-    std::array<int,3> max_;
-    std::array<int,3> need_;
+private:
+    std::array<int, 3> allocation_;
+    std::array<int, 3> max_;
+    std::array<int, 3> need_;
     int processID_;
-    bool safeSeq_;
 };
 
 class Safety {
-    public:
-    Safety(int n) {
-        num_ = n;
-        bool processes_[5] = {0};
-    }
+public:
     bool isSafe() {
-        for(int i = 0; i < 5; i++){
+        for (int i = 0; i < 5; i++) {
             if (processes_[i] == false) return false;
         }
         return true;
     }
-    void setBool(int n){
+    void setBool(int n) {
         processes_[n] = true;
     }
-    private:
-    int num_;
-    std::array<bool, 5> processes_;
+    bool isPSafe(int p) { return processes_[p]; }
+private:
+    std::array<bool, 5> processes_ = {0};
 };
 
 int Process::id_ = 0;
 
-Process::Process(std::array<int,3> alloc) {
+Process::Process(std::array<int, 3> alloc) {
     processID_ = id_++;
-    for(int i = 0; i < 3; i++){
-        allocation_[i]=alloc[i];
+    for (int i = 0; i < 3; i++) {
+        allocation_[i] = alloc[i];
     }
-    switch(processID_) {
-        case 0:
-            max_ = {7,5,3};
-        case 1:
-            max_ = {3,2,2};
-        case 2:
-            max_ = {9,0,2};
-        case 3:
-            max_ = {2,2,2};
-        case 4:
-            max_ = {4,3,3};
+    switch (processID_) {
+    case 0:
+        max_ = { 7,5,3 };
+        break;
+    case 1:
+        max_ = { 3,2,2 };
+        break;
+    case 2:
+        max_ = { 9,0,2 };
+        break;
+    case 3:
+        max_ = { 2,2,2 };
+        break;
+    case 4:
+        max_ = { 4,3,3 };
+        break;
     }
-    for(int j = 0; j < 3; j++){
+    for (int j = 0; j < 3; j++) {
         need_[j] = max_[j] - allocation_[j];
     }
-    safeSeq_ = false;
 }
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-		std::cerr << "Error: Input file is required." << std::endl;
-		std::cerr << "       The main must be the first argument followed by ";
-		std::cerr << "any other .txt file" << std::endl;
-		return(1);
-	}
+        std::cerr << "Error: Input file is required." << std::endl;
+        std::cerr << "       The main must be the first argument followed by ";
+        std::cerr << "any other .txt file" << std::endl;
+        return(1);
+    }
     std::ifstream in(argv[1]);
-	if (!in) { std::cerr << "Couldn't open file" << argv[1] << std::endl; exit(1); }
-	std::cout << "File opened" << std::endl;
+    if (!in) { std::cerr << "Couldn't open file" << argv[1] << std::endl; exit(1); }
+    std::cout << "File opened" << std::endl;
 
     std::vector<Process> processes;
     int one, two, three;
-    while (in >> one >> two >> three){
-        std::array<int,3> arr = {one, two, three};
+    while (in >> one >> two >> three) {
+        std::array<int, 3> arr = { one, two, three };
         Process process(arr);
         processes.push_back(process);
     }
 
     // Intializing available resources
-    std::array<int,3> work = {3, 3, 2};
+    std::array<int, 3> work = { 3, 3, 2 };
     //Doesnt let it run more than n times
     int exitCounter = 0;
-    int safeSequence[processes.size()];
+    std::vector<int> safeSequence;
     int sequenceNum = 0;
     //Checks the safety of the whole system
-    Safety safe(processes.size());
+    Safety safe;
     //While the system isnt safe, goes through the processes to see if one can be added
-    while(!safe.isSafe()){
-        for(Process p: processes){
-            if(p.isLOE(work)){
-                std::array<int,3> copy;
-                for(int j = 0; j < 3; j++){
-                    copy[j] = p.getNeed(j);
+    while (!safe.isSafe()) {
+        for (Process p : processes) {
+            if (p.isLOE(work) && !safe.isPSafe(p.getID())) {
+                std::array<int, 3> copy;
+                for (int j = 0; j < 3; j++) {
+                    copy[j] = p.getAlloc(j);
                 }
-                
-                for(int i = 0; i < 3; i++){
+                for (int i = 0; i < 3; i++) {
                     work[i] += copy[i];
-                    safeSequence[sequenceNum] = p.getID();
                 }
+                safeSequence.push_back(p.getID());
+                safe.setBool(p.getID());
             }
         }
         exitCounter++;
-        if(exitCounter > safe.isSafe()) break;
+        if (exitCounter > processes.size()) break;
     }
-    std::cout << "The system is: " << safe.isSafe() << "." << std::endl;
-    if(safe.isSafe()){
+    std::cout << "The system is: " << (safe.isSafe()?"Safe":"False") << "." << std::endl;
+    if (safe.isSafe()) {
         std::cout << "The safe sequence is: ";
-        for(int pID: safeSequence){
+        for (int pID : safeSequence) {
             std::cout << "P" << pID << " ";
         }
     }
