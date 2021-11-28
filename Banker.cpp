@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
         exitCounter++;
         if (exitCounter > processes.size()) break;
     }
-    std::cout << "The system is: " << (safe.isSafe()?"Safe":"False") << "." << std::endl;
+    std::cout << "The system is: " << (safe.isSafe()?"Safe":"Unsafe") << "." << std::endl;
     if (safe.isSafe()) {
         std::cout << "The safe sequence is: ";
         for (int pID : safeSequence) {
