@@ -40,7 +40,7 @@ C has 7 instances
 
 class Process {
 public:
-    Process(std::array<int, 3> alloc);
+    Process(std::array<int, 3> alloc, std::array<int, 3> max);
 
     int getID() { return processID_; }
     int getAlloc(int i) { return allocation_[i]; }
@@ -79,27 +79,13 @@ private:
 
 int Process::id_ = 0;
 
-Process::Process(std::array<int, 3> alloc) {
+Process::Process(std::array<int, 3> alloc, std::array<int, 3> max) {
     processID_ = id_++;
     for (int i = 0; i < 3; i++) {
         allocation_[i] = alloc[i];
     }
-    switch (processID_) {
-    case 0:
-        max_ = { 7,5,3 };
-        break;
-    case 1:
-        max_ = { 3,2,2 };
-        break;
-    case 2:
-        max_ = { 9,0,2 };
-        break;
-    case 3:
-        max_ = { 2,2,2 };
-        break;
-    case 4:
-        max_ = { 4,3,3 };
-        break;
+    for (int i = 0; i < 3; i++) {
+        max_[i] = max[i];
     }
     for (int j = 0; j < 3; j++) {
         need_[j] = max_[j] - allocation_[j];
@@ -118,10 +104,11 @@ int main(int argc, char* argv[]) {
     std::cout << "File opened" << std::endl;
 
     std::vector<Process> processes;
-    int one, two, three;
-    while (in >> one >> two >> three) {
-        std::array<int, 3> arr = { one, two, three };
-        Process process(arr);
+    int one, two, three, four, five, six;
+    while (in >> one >> two >> three >> four >> five >> six) {
+        std::array<int, 3> allocarr = { one, two, three };
+        std::array<int, 3> maxarr = { four, five, six };
+        Process process(allocarr, maxarr);
         processes.push_back(process);
     }
 
@@ -151,7 +138,7 @@ int main(int argc, char* argv[]) {
         exitCounter++;
         if (exitCounter > processes.size()) break;
     }
-    std::cout << "The system is: " << (safe.isSafe()?"Safe":"Unsafe") << "." << std::endl;
+    std::cout << "The system is: " << (safe.isSafe()?"Safe":"False") << "." << std::endl;
     if (safe.isSafe()) {
         std::cout << "The safe sequence is: ";
         for (int pID : safeSequence) {
