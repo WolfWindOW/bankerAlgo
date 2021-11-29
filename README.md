@@ -21,7 +21,7 @@ Compilation can be completed by running the following command with the "Banker.c
 If successful, one additional file will be created, called "Banker".
 
 ### Running the program
-Before running the program, an input file must be created. The format is an 3 integers per line, with a space separating them, for a total of 5 lines. A sample has been provided.
+Before running the program, an input file must be created. The format is an 3 integers per line, with a space separating them, for a total of 10 lines. The n%2 == 1 lines should be the amount of resources that are allocated to the process at t0. The n%2 == 0 lines should be the max amount of resources a process needs in order to complete execution. A sample has been provided.
 In order to run the program, the following command must be used, provided that the given text file is being used. Otherwise substitute for whatever the name of your text file is.
 >./Banker input.txt
  
